@@ -1,0 +1,31 @@
+{
+  "name": "polyline-clean",
+  "version": "1.0.1",
+  "description": "Clean polygon or polyline coordinates: remove duplicates, collinear or degenerate segments, holes, trim etc.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dy/polyline-clean.git"
+  },
+  "keywords": [
+    "polygon",
+    "polygon-clean",
+    "polyline-clean",
+    "clean",
+    "convex",
+    "2d",
+    "polyline",
+    "poly",
+    "path",
+    "duplicate",
+    "collinear"
+  ],
+  "author": "Dmitry Yv <df.creative@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^4.9.0"
+  }
+}
