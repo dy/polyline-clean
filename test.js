@@ -9,6 +9,10 @@ t('remove degenerate segments', t => {
 		c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]]),
 		[[0,0], [3,3]]
 	)
+	t.deepEqual(
+		c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]], {fold: false}),
+		[[0,0], [1,1], [.5,.5], [1,1], [3,3]]
+	)
 	t.end()
 })
 
@@ -19,6 +23,7 @@ t('duplicates', t => {
 
 t('collinear polygon end and start', t => {
 	t.deepEqual(c([[.5,.5], [1,1], [0,1], [0,0], [.5,.5]], {polygon: true}), [[1,1], [0,1], [0,0]])
+	t.deepEqual(c([[0,0], [1,1], [0,1], [0,0], [.5,.5]], {polygon: true}), [[0,0], [1,1], [0,1]])
 	t.end()
 })
 
@@ -40,7 +45,7 @@ t('ids as output', t => {
 
 t('angle threshold', t => {
 	t.deepEqual(
-		c([[0,0], [.5,.500001], [1,1], [1,0]], {threshold: 1e-2}),
+		c([[0,0], [.5,.500001], [1,1], [1,0]], {fold: 1e-2}),
 		[[0,0], [1,1], [1,0]]
 	)
 	t.end()
@@ -62,7 +67,7 @@ t('polygons', t => {
 	t.deepEqual(c([[0,0]], {polygon: true}), null)
 	t.deepEqual(c([null, [null], NaN, [0, 1], [null, null], null], {polygon: true}), null)
 
-	t.deepEqual(c([[0,0], [.5,.500001], [1,1]], {threshold: 1e-2, polygon: true}) , null)
+	t.deepEqual(c([[0,0], [.5,.500001], [1,1]], {fold: 1e-2, polygon: true}) , null)
 
 	t.deepEqual(c([[0,0], [.25,.5], [.5,.5], [.75,.75], [1,1]], {ids: true}) , [0,1,2,4])
 

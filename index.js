@@ -9,7 +9,8 @@ module.exports = function polyClean (coords, opts) {
   if (polygon && coords.length < 3) return null
 
   // process collinearities
-  var threshold = opts.threshold == null ? 0.000027 : opts.threshold
+  var fold = opts.fold == null || opts.fold === true ? 0.000027 : opts.fold
+
   var result = [], ptr = 0
 
   while (ptr < coords.length) {
@@ -37,9 +38,9 @@ module.exports = function polyClean (coords, opts) {
     var currDir = dif(newPt, currPt)
     var prevDir = dif(currPt, prevPt)
 
-    var collinearSign = collinear(currDir, prevDir, threshold)
+    var collinearSign = fold ? collinear(currDir, prevDir, fold) : 0
 
-    // non-collinear
+    // non-collinear or ignored folding
     if (!collinearSign) {
       result.push(ptr++)
       continue
@@ -57,7 +58,7 @@ module.exports = function polyClean (coords, opts) {
     if (collinearSign < 0 && result.length > 2) {
       var prePrevPt = coords[result[result.length - 3]]
       var prePrevDir = dif(prevPt, prePrevPt)
-      var prevCollinearSign = collinear(currDir, prePrevDir, threshold)
+      var prevCollinearSign = collinear(currDir, prePrevDir, fold)
 
       // if curr vector is collinear with the one before
       if (prevCollinearSign > 0) {
@@ -120,10 +121,17 @@ module.exports = function polyClean (coords, opts) {
     var firstPt = coords[result[0]]
     var secondPt = coords[result[1]]
     var lastPt = coords[result[result.length - 1]]
-    if (collinear(dif(secondPt, firstPt), dif(firstPt, lastPt), threshold)) {
+    var endCollinearSign = collinear(dif(secondPt, firstPt), dif(firstPt, lastPt), fold)
+    if (endCollinearSign > 0) {
       result.shift()
     }
+    else if (endCollinearSign < 0) {
+      result.pop()
+    }
   }
+
+  // remove coinciding end once again
+  if (polygon && same(coords[result[0]], coords[result[result.length - 1]])) result.pop()
 
   // ignore degenerate resulting polygon
   if (polygon && result.length < 3) return null
@@ -156,7 +164,7 @@ function dif(a, b) {
   return [a[0] - b[0], a[1] - b[1]]
 }
 
-function collinear(a, b, threshold) {
+function collinear(a, b, minAngle) {
   var dotProduct = dot(a, b)
 
   var magA = mag(a)
@@ -165,10 +173,10 @@ function collinear(a, b, threshold) {
   var angle = Math.acos(dotProduct / (magA*magB))
 
   // unidirectional
-  if (angle <= threshold) return 1
+  if (angle <= minAngle) return 1
 
   // reverse direction
-  if (Math.abs(Math.PI - angle) < threshold) return -1
+  if (Math.abs(Math.PI - angle) < minAngle) return -1
 
   return 0
 }

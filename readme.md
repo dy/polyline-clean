@@ -7,22 +7,20 @@ Clean polyline or polygon data: remove duplicate, collinear, null points, etc.
 ```js
 const c = require('polyline-clean')
 
-// remove degenerate/collinear segments
+// remove duplicate, degenerate or collinear segments
 c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]])
-// [[0,0], [3,3]]
-
-// ids as output
-c([[0,0], [.5,.5], [1,1]], {ids: true})
-// [0, 2]
-
-// angle threshold
-c([[0,0], [.5,.500001], [1,1], [1,0]], {threshold: 1e-2})
-// [[0,0], [1,1], [1,0]]
-
-// polygon optimizations
-c([[0,0], [2,2], [1,1], [0,1], [0,0]], {polygon: true})
-//[[0,0], [1,1], [0,1]]
+// === [[0,0], [3,3]]
 ```
+
+## `c(coordinates, options?)`
+
+Return new coordinates array with bad points removed. If result is degenerate, `null` will be returned.
+
+Option | Meaning
+---|---
+`ids` | Return indexes in the initial array instead of points.
+`fold` | Collapse collinear segments. Can be a number indicating min angle threshold. `polygon` mode has more rigid folding. Useful to disable it when data has logarithmic fashion.
+`polygon` | Apply polygon optimizations: remove coinciding end, collinear end segments, ignore degenerate results.
 
 ## Related
 
