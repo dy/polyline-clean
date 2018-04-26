@@ -20,17 +20,17 @@ module.exports = function polyClean (coords, opts) {
       continue
     }
 
-    // in the process result can collapse, hence check length
-    if (result.length < 2) {
-      result.push(ptr++)
-      continue
-    }
-
     var currPt = coords[result[result.length - 1]]
     var prevPt = coords[result[result.length - 2]]
 
-    if (same(newPt, currPt)) {
+    if (result.length && same(newPt, currPt)) {
       ptr++
+      continue
+    }
+
+    // in the process result can collapse, hence check length
+    if (result.length < 2) {
+      result.push(ptr++)
       continue
     }
 
@@ -109,10 +109,21 @@ module.exports = function polyClean (coords, opts) {
     result.push(ptr++)
   }
 
-  // TODO: remove collinear last and first in case of polygons
+  // ignore degenerate resulting polygon
+  if (polygon && result.length < 3) return null
 
   // remove coinciding end
   if (polygon && same(coords[result[0]], coords[result[result.length - 1]])) result.pop()
+
+  // remove collinear last and first in case of polygons
+  if (polygon) {
+    var firstPt = coords[result[0]]
+    var secondPt = coords[result[1]]
+    var lastPt = coords[result[result.length - 1]]
+    if (collinear(dif(secondPt, firstPt), dif(firstPt, lastPt), threshold)) {
+      result.shift()
+    }
+  }
 
   // ignore degenerate resulting polygon
   if (polygon && result.length < 3) return null

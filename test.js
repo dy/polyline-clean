@@ -12,6 +12,16 @@ t('remove degenerate segments', t => {
 	t.end()
 })
 
+t('duplicates', t => {
+	t.deepEqual(c([[0,0], [0,0], [1,1]]), [[0,0], [1,1]])
+	t.end()
+})
+
+t('collinear polygon end and start', t => {
+	t.deepEqual(c([[.5,.5], [1,1], [0,1], [0,0], [.5,.5]], {polygon: true}), [[1,1], [0,1], [0,0]])
+	t.end()
+})
+
 t('multiple repeats', t => {
 	t.deepEqual(
 		c([[0,0], [1,1], [0,0], [1,1], [.1,.1], [2,2], [-.5,-.5], [1,1]]),
