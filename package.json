@@ -1,6 +1,6 @@
 {
   "name": "polyline-clean",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Clean polygon or polyline coordinates: remove duplicates, collinear or degenerate segments, holes, trim etc.",
   "main": "index.js",
   "scripts": {
