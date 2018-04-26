@@ -3,6 +3,7 @@
 const c = require('./')
 const t = require('tape')
 
+
 t('remove degenerate segments', t => {
 	t.deepEqual(
 		c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]]),
@@ -68,17 +69,17 @@ t('polygons', t => {
 	t.end()
 })
 
-t('normal points', t=>{
+t('normal points', t => {
 	t.deepEqual(c([[0,0], [1,1], [2,3]], {polygon: true}), [[0,0], [1,1], [2,3]])
 	t.end()
 })
 
-t('closed shape', t=>{
+t('closed shape', t => {
 	t.deepEqual(c([[0,0], [1,1], [0,1], [0,0]], {polygon: true}), [[0,0], [1,1], [0,1]])
 	t.end()
 })
 
-t('degenerate', t=>{
+t('degenerate', t => {
 	t.deepEqual(c([[0,0]], {polygon: true}), null)
 	t.deepEqual(c([[0,0], [1,1]], {polygon: true}), null)
 	t.deepEqual(c([[0,0], [1,1], [2,0], [1,1]], {polygon: true}), null)
