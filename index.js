@@ -110,34 +110,40 @@ module.exports = function polyClean (coords, opts) {
     result.push(ptr++)
   }
 
-  // ignore degenerate resulting polygon
-  if (polygon && result.length < 3) return null
-
-  // remove coinciding end
-  if (polygon && same(coords[result[0]], coords[result[result.length - 1]])) result.pop()
-
-  // remove collinear last and first in case of polygons
   if (polygon) {
+    // ignore degenerate resulting polygon
+    if (result.length < 3) return null
+
+
+    // remove coinciding end
+    if (same(coords[result[0]], coords[result[result.length - 1]])) result.pop()
+
+    // remove collinear last and first in case of polygons
     var firstPt = coords[result[0]]
     var secondPt = coords[result[1]]
     var lastPt = coords[result[result.length - 1]]
     var endCollinearSign = collinear(dif(secondPt, firstPt), dif(firstPt, lastPt), fold)
     if (endCollinearSign > 0) {
       result.shift()
+      firstPt = secondPt
     }
     else if (endCollinearSign < 0) {
       result.pop()
     }
+
+    // remove coinciding end once again
+    if (same(firstPt, coords[result[result.length - 1]])) result.pop()
+
+    // ignore degenerate resulting polygon
+    if (result.length < 3) return null
   }
 
-  // remove coinciding end once again
-  if (polygon && same(coords[result[0]], coords[result[result.length - 1]])) result.pop()
-
-  // ignore degenerate resulting polygon
-  if (polygon && result.length < 3) return null
-
   // map ids if necessary
-  if (!opts.index && !opts.ids) result = result.map(id => coords[id])
+  if (!opts.index && !opts.ids) {
+    for (ptr = 0; ptr < result.length; ptr++) {
+      result[ptr] = coords[result[ptr]]
+    }
+  }
 
   return result
 }
