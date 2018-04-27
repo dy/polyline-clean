@@ -1,12 +1,16 @@
 'use strict'
 
+var flatten = require('flatten-vertex-data')
+
 module.exports = function polyClean (coords, opts) {
   if (!opts) opts = {}
+
+  // if (typeof coords[0] != 'number') coords = flatten(coords, 'float64')
 
   var polygon = !!opts.polygon
 
   // ignore degenerate polygon
-  if (polygon && coords.length < 3) return null
+  if (polygon && coords.length < 6) return null
 
   // process collinearities
   var fold = opts.fold == null || opts.fold === true ? 0.000027 : opts.fold
@@ -14,17 +18,20 @@ module.exports = function polyClean (coords, opts) {
   var result = [], ptr = 0
 
   while (ptr < coords.length) {
-    var newPt = coords[ptr]
+    var newPtX = coords[ptr*2]
+    var newPtY = coords[ptr*2+1]
 
-    if (bad(newPt)) {
+    if (bad(newPtX, newPtY)) {
       ptr++
       continue
     }
 
-    var currPt = coords[result[result.length - 1]]
-    var prevPt = coords[result[result.length - 2]]
+    var currId = result[result.length - 1]
+    var prevId = result[result.length - 2]
+    var currPtX = coords[currId*2], currPtY = coords[currId*2 + 1]
+    var prevPtX = coords[prevId*2], prevPtY = coords[prevId*2 + 1]
 
-    if (result.length && same(newPt, currPt)) {
+    if (result.length && same(newPtX, newPtY, currPtX, currPtY)) {
       ptr++
       continue
     }
@@ -35,8 +42,8 @@ module.exports = function polyClean (coords, opts) {
       continue
     }
 
-    var currDir = dif(newPt, currPt)
-    var prevDir = dif(currPt, prevPt)
+    var currDir = dif(newPtX, newPtY, currPtX, currPtY)
+    var prevDir = dif(currPtX, currPtY, prevPtX, prevPtY)
 
     var collinearSign = fold ? collinear(currDir, prevDir, fold) : 0
 
@@ -49,15 +56,16 @@ module.exports = function polyClean (coords, opts) {
     // polygon ignores collinear/reverse lines
     if (polygon || collinearSign > 0) {
       result.pop()
-      if (!same(newPt, prevPt)) result.push(ptr)
+      if (!same(newPtX, newPtY, prevPtX, prevPtY)) result.push(ptr)
       ptr++
       continue
     }
 
     // polyline keeps collinear edge points and skips everything in between
     if (collinearSign < 0 && result.length > 2) {
-      var prePrevPt = coords[result[result.length - 3]]
-      var prePrevDir = dif(prevPt, prePrevPt)
+      var prePrevId = result[result.length - 3]
+      var prePrevPtX = coords[prePrevId*2], prePrevPtY = coords[prePrevId*2 + 1]
+      var prePrevDir = dif(prevPtX, prevPtY, prePrevPtX, prePrevPtY)
       var prevCollinearSign = collinear(currDir, prePrevDir, fold)
 
       // if curr vector is collinear with the one before
@@ -140,22 +148,26 @@ module.exports = function polyClean (coords, opts) {
 
   // map ids if necessary
   if (!opts.index && !opts.ids) {
+    var output = Array(result.length * 2)
     for (ptr = 0; ptr < result.length; ptr++) {
-      result[ptr] = coords[result[ptr]]
+      var id = result[ptr] * 2
+      output[ptr*2] = coords[id]
+      output[ptr*2 + 1] = coords[id + 1]
     }
+    return output
   }
 
   return result
 }
 
-function bad(p) {
-  if (!p || isNaN(p[0]) || isNaN(p[1]) || p[0] == null || p[1] == null) return true
+function bad(x, y) {
+  if (isNaN(x) || isNaN(y) || x == null || y == null) return true
 
   return false
 }
 
-function same(a, b) {
-  return a[0] === b[0] && a[1] === b[1]
+function same(x1, y1, x2, y2) {
+  return x1 === x2 && y1 === y2
 }
 
 function dot(v1, v2) {
@@ -166,8 +178,8 @@ function mag(a) {
   return Math.sqrt(a[0]*a[0] + a[1]*a[1])
 }
 
-function dif(a, b) {
-  return [a[0] - b[0], a[1] - b[1]]
+function dif(x1, y1, x2, y2) {
+  return [x1 - x2, y1 - y2]
 }
 
 function collinear(a, b, minAngle) {

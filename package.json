@@ -27,5 +27,8 @@
   "license": "MIT",
   "devDependencies": {
     "tape": "^4.9.0"
+  },
+  "dependencies": {
+    "flatten-vertex-data": "^1.0.1"
   }
 }

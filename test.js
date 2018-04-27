@@ -20,6 +20,7 @@ t('remove degenerate segments', t => {
 t.only('performance', t => {
 	let data = []
 	for (let i = 0; i < 1e6; i++) {
+		// data.push([Math.random(), Math.random()])
 		data.push(Math.random())
 		data.push(Math.random())
 	}
