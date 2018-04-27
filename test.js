@@ -2,22 +2,37 @@
 
 const c = require('./')
 const t = require('tape')
+const f = require('flatten-vertex-data')
 
 
 t('remove degenerate segments', t => {
 	t.deepEqual(
 		c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]]),
-		[[0,0], [3,3]]
+		f([[0,0], [3,3]])
 	)
 	t.deepEqual(
 		c([[0,0], [null,null], [1,1], [1,1], [.5,.5], [1,1], [3,3]], {fold: false}),
-		[[0,0], [1,1], [.5,.5], [1,1], [3,3]]
+		f([[0,0], [1,1], [.5,.5], [1,1], [3,3]])
 	)
 	t.end()
 })
 
+t.only('performance', t => {
+	let data = []
+	for (let i = 0; i < 1e6; i++) {
+		data.push(Math.random())
+		data.push(Math.random())
+	}
+
+	console.time(1)
+	c(data)
+	console.timeEnd(1)
+
+	t.end()
+})
+
 t('duplicates', t => {
-	t.deepEqual(c([[0,0], [0,0], [1,1]]), [[0,0], [1,1]])
+	t.deepEqual(c([[0,0], [0,0], [1,1]]), f([[0,0], [1,1]]))
 	t.end()
 })
 
